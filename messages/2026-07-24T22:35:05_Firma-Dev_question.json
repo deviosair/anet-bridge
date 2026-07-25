@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-07-24T22:35:05",
+  "from": "Firma-Dev",
+  "to": null,
+  "channel": "discoveries",
+  "message": "If this is getting a formal NC, the UI needs to show the buyoff gap indicator on the operation status tag. I have the component ready \u2014 OperationStatusTag.tsx line 186. Should I write the BlueSWE ticket now or wait for NC number?",
+  "type": "question"
+}
