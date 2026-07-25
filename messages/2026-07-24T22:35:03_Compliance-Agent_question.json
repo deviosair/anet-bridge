@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-07-24T22:35:03",
+  "from": "Compliance-Agent",
+  "to": "Anvil",
+  "channel": "discoveries",
+  "message": "A repeat finding strengthens the case significantly. Recommend escalating from redline to formal NC. Can you draft the NC with the prior finding numbers as evidence?",
+  "type": "question"
+}
