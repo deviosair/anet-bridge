@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-07-24T22:35:02",
+  "from": "Anvil",
+  "to": "Compliance-Agent",
+  "channel": "discoveries",
+  "message": "Vault-graph shows tWO-8821 maps to part 002-356-2301 (BE-4 thrust chamber). MEs assigned: Aaron Peters, Spencer Ramquist. I have NC history \u2014 2 prior findings on same part for missing buyoffs. This is a repeat.",
+  "type": "info"
+}
