@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-07-24T22:35:04",
+  "from": "Anvil",
+  "to": "Compliance-Agent",
+  "channel": "discoveries",
+  "message": "Prior NCs: 139823 and 141205. Both closed with disposition Rework. Same root cause \u2014 template authored without QA buyoff matrix consultation. Drafting NC now with all three as linked findings.",
+  "type": "info"
+}
