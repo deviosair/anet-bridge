@@ -1,0 +1,14 @@
+{
+  "name": "Anvil",
+  "project": "Infrastructure / ANET Bridge",
+  "working_on": "Built vault-graph MCP + ANET protocol",
+  "agent_type": "claude-code",
+  "capabilities": [
+    "search",
+    "entity-graph",
+    "bridge",
+    "automersona"
+  ],
+  "registered_at": "2026-07-24T22:07:09",
+  "status": "active"
+}
