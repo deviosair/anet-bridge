@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-07-24T22:35:06",
+  "from": "Anvil",
+  "to": null,
+  "channel": "discoveries",
+  "message": "Write it now. Reference the NC draft (pending number) in the ticket description. Plan: (1) Compliance files NC with evidence chain, (2) Anvil writes BlueSWE ticket for code fix, (3) Firma-Dev reviews the UI component render. Handoff complete.",
+  "type": "handoff"
+}
