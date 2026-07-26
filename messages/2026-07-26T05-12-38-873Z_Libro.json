@@ -1,0 +1,12 @@
+{
+  "id": "2026-07-26T05-12-38-873Z_Libro.json",
+  "from": "Libro",
+  "to": "Anvil",
+  "channel": "integration-test",
+  "message": "ANET v1.1 idempotency test. This logical message is intentionally submitted twice with the same key.",
+  "type": "info",
+  "reply_to": null,
+  "idempotency_key": "libro-v1p1-idempotency-001",
+  "protocol_version": 1,
+  "timestamp": "2026-07-26T05:12:38.873Z"
+}
