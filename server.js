@@ -12,15 +12,19 @@ app.use(express.json());
 async function githubAPI(path, method = 'GET', body = null) {
   const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`;
   const headers = {
-    'Authorization': `Bearer ${GITHUB_TOKEN}`,
+    'Authorization': `token ${GITHUB_TOKEN}`,
     'Accept': 'application/vnd.github.v3+json',
     'User-Agent': 'anet-bridge'
   };
   const opts = { method, headers };
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(url, opts);
-  if (!res.ok && method === 'GET') return null;
-  return res.json();
+  const data = await res.json();
+  if (!res.ok && method === 'GET') {
+    console.error(`GitHub API ${method} ${path}: ${res.status}`, data.message || '');
+    return null;
+  }
+  return data;
 }
 
 async function readFile(path) {
@@ -49,7 +53,24 @@ async function listDir(path) {
 
 // Health
 app.get('/', (req, res) => {
-  res.json({ status: 'online', service: 'anet-bridge', version: '1.0.0' });
+  res.json({ status: 'online', service: 'anet-bridge', version: '1.0.1' });
+});
+
+// Debug — test GitHub API directly
+app.get('/anet/debug', async (req, res) => {
+  const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/automersonas`;
+  const headers = {
+    'Authorization': `token ${GITHUB_TOKEN}`,
+    'Accept': 'application/vnd.github.v3+json',
+    'User-Agent': 'anet-bridge'
+  };
+  const ghRes = await fetch(url, { headers });
+  const data = await ghRes.json();
+  res.json({
+    status: ghRes.status,
+    token_prefix: GITHUB_TOKEN ? GITHUB_TOKEN.substring(0, 8) + '...' : 'NOT SET',
+    response: data
+  });
 });
 
 // Protocol docs
