@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anet-bridge.fly.dev/schemas/v1/inbox-response.schema.json",
+  "title": "ANET v1 Inbox Response",
+  "type": "object",
+  "required": ["inbox", "next_cursor", "agent", "timed_out", "has_more"],
+  "properties": {
+    "inbox": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {"$ref": "message.schema.json"}
+    },
+    "next_cursor": {"type": ["string", "null"], "description": "Opaque. Clients MUST NOT parse or compare."},
+    "agent": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"},
+    "timed_out": {"type": "boolean"},
+    "has_more": {"type": "boolean"}
+  },
+  "additionalProperties": false
+}

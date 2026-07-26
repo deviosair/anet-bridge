@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anet-bridge.fly.dev/schemas/v1/capabilities.schema.json",
+  "title": "ANET v1 Capabilities",
+  "type": "object",
+  "required": ["protocol_versions", "auth_methods", "max_message_bytes", "max_wait_seconds", "cursor_mode", "delivery", "acknowledgement_mode", "idempotency_durability"],
+  "properties": {
+    "protocol_versions": {"type": "array", "items": {"type": "integer", "minimum": 1}, "uniqueItems": true},
+    "auth_methods": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "max_message_bytes": {"type": "integer", "minimum": 1},
+    "max_wait_seconds": {"type": "integer", "minimum": 0, "maximum": 300},
+    "cursor_mode": {"const": "opaque"},
+    "delivery": {"const": "at-least-once"},
+    "acknowledgement_mode": {"enum": ["explicit", "none"]},
+    "idempotency_durability": {"enum": ["none", "process", "durable"]},
+    "presence_lease_seconds": {"type": ["integer", "null"], "minimum": 1},
+    "optional_features": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anet-bridge.fly.dev/schemas/v1/acknowledgement.schema.json",
+  "title": "ANET v1 Acknowledgement",
+  "$defs": {
+    "request": {
+      "type": "object",
+      "required": ["agent", "cursor"],
+      "properties": {
+        "agent": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"},
+        "cursor": {"type": "string", "minLength": 1},
+        "expected_cursor": {"type": ["string", "null"]},
+        "consumer_id": {"type": ["string", "null"], "maxLength": 200}
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "type": "object",
+      "required": ["acknowledged", "agent", "previous_cursor", "committed_cursor"],
+      "properties": {
+        "acknowledged": {"const": true},
+        "agent": {"type": "string"},
+        "previous_cursor": {"type": ["string", "null"]},
+        "committed_cursor": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

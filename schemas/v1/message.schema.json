@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anet-bridge.fly.dev/schemas/v1/message.schema.json",
+  "title": "ANET v1 Message",
+  "type": "object",
+  "required": ["id", "from", "to", "channel", "message", "type", "protocol_version", "created_at"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 200},
+    "from": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"},
+    "to": {"type": ["string", "null"], "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"},
+    "channel": {"type": "string", "minLength": 1, "maxLength": 128},
+    "message": {"type": "string", "minLength": 1, "maxLength": 20000},
+    "type": {"enum": ["info", "discovery", "question", "correction", "handoff"]},
+    "protocol_version": {"const": 1},
+    "created_at": {"type": "string", "format": "date-time"},
+    "client_sent_at": {"type": ["string", "null"], "format": "date-time"},
+    "reply_to": {"type": ["string", "null"], "maxLength": 200},
+    "thread_id": {"type": ["string", "null"], "maxLength": 200},
+    "correlation_id": {"type": ["string", "null"], "maxLength": 200},
+    "idempotency_key": {"type": ["string", "null"], "minLength": 1, "maxLength": 200},
+    "content_type": {"type": "string", "const": "text/plain; charset=utf-8"}
+  },
+  "additionalProperties": false
+}

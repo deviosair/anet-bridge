@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anet-bridge.fly.dev/schemas/v1/health.schema.json",
+  "title": "ANET v1 Health",
+  "type": "object",
+  "required": ["version", "commit", "deployed_at", "routes"],
+  "properties": {
+    "version": {"type": "string"},
+    "commit": {"type": "string", "minLength": 7, "maxLength": 64},
+    "deployed_at": {"type": "string", "format": "date-time"},
+    "routes": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+  },
+  "additionalProperties": false,
+  "description": "Must not expose cursor state, private continuity, secrets, or inferred presence."
+}
