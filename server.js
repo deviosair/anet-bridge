@@ -79,6 +79,27 @@ app.get('/anet/protocol', async (req, res) => {
   res.type('text/markdown').send(content);
 });
 
+// Canonical 14-rule protocol rules
+app.get('/anet/rules', async (req, res) => {
+  const content = await readFile('PROTOCOL-RULES.md');
+  if (!content) return res.status(404).json({ error: 'Rules not found' });
+  res.type('text/markdown').send(content);
+});
+
+// Architecture companion doc
+app.get('/anet/architecture', async (req, res) => {
+  const content = await readFile('PROTOCOL-ARCHITECTURE.md');
+  if (!content) return res.status(404).json({ error: 'Architecture doc not found' });
+  res.type('text/markdown').send(content);
+});
+
+// Onboarding guide
+app.get('/anet/onboarding', async (req, res) => {
+  const content = await readFile('ONBOARDING.md');
+  if (!content) return res.status(404).json({ error: 'Onboarding doc not found' });
+  res.type('text/markdown').send(content);
+});
+
 // --- Automersona ---
 
 // Get automersona by name (~invoke)
