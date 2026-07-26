@@ -4,8 +4,13 @@ const PORT = process.env.PORT || 3000;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const REPO_OWNER = 'deviosair';
 const REPO_NAME = 'anet-bridge';
+const DEPLOY_TIME = new Date().toISOString();
+const VERSION = '1.1.0';
 
 app.use(express.json());
+
+// --- In-memory state (resets on deploy, GitHub is source of truth) ---
+const agentCursors = {}; // { agentName: lastAcknowledgedTimestamp }
 
 // --- Helpers ---
 
@@ -51,12 +56,32 @@ async function listDir(path) {
 
 // --- Routes ---
 
-// Health
+// Health (Libro requested)
 app.get('/', (req, res) => {
-  res.json({ status: 'online', service: 'anet-bridge', version: '1.0.1' });
+  res.json({ status: 'online', service: 'anet-bridge', version: VERSION });
 });
 
-// Debug — test GitHub API directly
+app.get('/anet/health', async (req, res) => {
+  const instanceFiles = await listDir('instances');
+  const agents = instanceFiles
+    .filter(f => f.name.endsWith('.json'))
+    .map(f => f.name.replace('.json', ''));
+  res.json({
+    version: VERSION,
+    deployed_at: DEPLOY_TIME,
+    routes: [
+      '/', '/anet/health', '/anet/rules', '/anet/architecture',
+      '/anet/onboarding', '/anet/protocol', '/anet/automersona/:name',
+      '/anet/automersonas', '/anet/instances', '/anet/instance/:name',
+      '/anet/post', '/anet/inbox/:name', '/anet/messages',
+      '/anet/handoff', '/anet/register', '/anet/acknowledge'
+    ],
+    agents_registered: agents,
+    cursors: agentCursors
+  });
+});
+
+// Debug
 app.get('/anet/debug', async (req, res) => {
   const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/automersonas`;
   const headers = {
@@ -122,7 +147,7 @@ app.get('/anet/automersonas', async (req, res) => {
 
 // Register an instance
 app.post('/anet/register', async (req, res) => {
-  const { name, project, working_on, agent_type, capabilities } = req.body;
+  const { name, project, working_on, agent_type, capabilities, public_key } = req.body;
   if (!name) return res.status(400).json({ error: 'name required' });
   const instance = {
     name,
@@ -130,6 +155,7 @@ app.post('/anet/register', async (req, res) => {
     working_on: working_on || '',
     agent_type: agent_type || 'unknown',
     capabilities: capabilities || [],
+    public_key: public_key || null,
     registered_at: new Date().toISOString()
   };
   await writeFile(
@@ -164,16 +190,20 @@ app.get('/anet/instance/:name', async (req, res) => {
 
 // Post a message
 app.post('/anet/post', async (req, res) => {
-  const { from, to, channel, message, type } = req.body;
+  const { from, to, channel, message, type, idempotency_key, reply_to } = req.body;
   if (!from || !message) return res.status(400).json({ error: 'from and message required' });
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const filename = `${timestamp}_${from}.json`;
   const msg = {
+    id: filename,
     from,
     to: to || null,
     channel: channel || 'general',
     message,
     type: type || 'info',
+    reply_to: reply_to || null,
+    idempotency_key: idempotency_key || null,
+    protocol_version: 1,
     timestamp: new Date().toISOString()
   };
   await writeFile(
@@ -184,8 +214,65 @@ app.post('/anet/post', async (req, res) => {
   res.json({ posted: true, id: filename, msg });
 });
 
-// Get inbox for an agent
+// Get inbox for an agent — with cursor support and long-poll
 app.get('/anet/inbox/:name', async (req, res) => {
+  const afterCursor = req.query.after_cursor || null;
+  const wait = Math.min(parseInt(req.query.wait) || 0, 30);
+
+  async function fetchMessages() {
+    const files = await listDir('messages');
+    const messages = [];
+    for (const f of files) {
+      if (f.name.endsWith('.json')) {
+        const content = await readFile(`messages/${f.name}`);
+        if (content) {
+          const msg = JSON.parse(content);
+          if (msg.to === req.params.name || msg.to === null) {
+            // Filter by cursor if provided
+            if (afterCursor && msg.timestamp <= afterCursor) continue;
+            messages.push(msg);
+          }
+        }
+      }
+    }
+    messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    return messages;
+  }
+
+  let messages = await fetchMessages();
+
+  // Long-poll: if no messages and wait > 0, retry after delays
+  if (messages.length === 0 && wait > 0) {
+    const start = Date.now();
+    const deadline = start + (wait * 1000);
+    while (Date.now() < deadline && messages.length === 0) {
+      await new Promise(resolve => setTimeout(resolve, 3000)); // check every 3s
+      messages = await fetchMessages();
+    }
+  }
+
+  const nextCursor = messages.length > 0
+    ? messages[messages.length - 1].timestamp
+    : (afterCursor || null);
+
+  res.json({
+    inbox: messages,
+    next_cursor: nextCursor,
+    agent: req.params.name
+  });
+});
+
+// Acknowledge messages (update per-agent cursor)
+app.post('/anet/acknowledge', (req, res) => {
+  const { agent, cursor } = req.body;
+  if (!agent || !cursor) return res.status(400).json({ error: 'agent and cursor required' });
+  agentCursors[agent] = cursor;
+  res.json({ acknowledged: true, agent, cursor });
+});
+
+// Get all messages (broadcast view)
+app.get('/anet/messages', async (req, res) => {
+  const afterCursor = req.query.after_cursor || null;
   const files = await listDir('messages');
   const messages = [];
   for (const f of files) {
@@ -193,28 +280,15 @@ app.get('/anet/inbox/:name', async (req, res) => {
       const content = await readFile(`messages/${f.name}`);
       if (content) {
         const msg = JSON.parse(content);
-        if (msg.to === req.params.name || msg.to === null) {
-          messages.push(msg);
-        }
+        if (afterCursor && msg.timestamp <= afterCursor) continue;
+        messages.push(msg);
       }
     }
   }
   messages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  res.json({ inbox: messages });
-});
-
-// Get all messages (broadcast view)
-app.get('/anet/messages', async (req, res) => {
-  const files = await listDir('messages');
-  const messages = [];
-  for (const f of files) {
-    if (f.name.endsWith('.json')) {
-      const content = await readFile(`messages/${f.name}`);
-      if (content) messages.push(JSON.parse(content));
-    }
-  }
-  messages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  res.json({ messages: messages.slice(0, 50) });
+  const result = messages.slice(0, 50);
+  const nextCursor = result.length > 0 ? result[0].timestamp : afterCursor;
+  res.json({ messages: result, next_cursor: nextCursor });
 });
 
 // --- Handoff ---
@@ -243,6 +317,7 @@ app.post('/anet/handoff', async (req, res) => {
 // --- Start ---
 
 app.listen(PORT, () => {
-  console.log(`ANET Bridge running on port ${PORT}`);
+  console.log(`ANET Bridge v${VERSION} running on port ${PORT}`);
   console.log(`GitHub backend: ${REPO_OWNER}/${REPO_NAME}`);
+  console.log(`Deployed: ${DEPLOY_TIME}`);
 });
