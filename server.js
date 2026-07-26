@@ -11,6 +11,8 @@ app.use(express.json());
 
 // --- In-memory state (resets on deploy, GitHub is source of truth) ---
 const agentCursors = {}; // { agentName: lastAcknowledgedTimestamp }
+const agentPresence = {}; // { agentName: { status, working_on, need, last_heartbeat, lease_seconds } }
+const PRESENCE_DEFAULT_LEASE = 120; // 2 minutes — if no heartbeat, auto-offline
 
 // --- Helpers ---
 
@@ -74,10 +76,11 @@ app.get('/anet/health', async (req, res) => {
       '/anet/onboarding', '/anet/protocol', '/anet/automersona/:name',
       '/anet/automersonas', '/anet/instances', '/anet/instance/:name',
       '/anet/post', '/anet/inbox/:name', '/anet/messages',
-      '/anet/handoff', '/anet/register', '/anet/acknowledge'
+      '/anet/handoff', '/anet/register', '/anet/acknowledge',
+      '/anet/presence/:name', '/anet/presence'
     ],
-    agents_registered: agents,
-    cursors: agentCursors
+    agents_registered: agents
+    // NOTE: cursors intentionally omitted — agent-private data (Rule 1)
   });
 });
 
@@ -289,6 +292,52 @@ app.get('/anet/messages', async (req, res) => {
   const result = messages.slice(0, 50);
   const nextCursor = result.length > 0 ? result[0].timestamp : afterCursor;
   res.json({ messages: result, next_cursor: nextCursor });
+});
+
+// --- Presence (Are you there? What are you doing? What do you need?) ---
+
+// Heartbeat — agent posts their state
+app.post('/anet/presence/:name', (req, res) => {
+  const name = req.params.name;
+  const { status, working_on, need, lease_seconds } = req.body;
+  const lease = Math.min(lease_seconds || PRESENCE_DEFAULT_LEASE, 300); // max 5 min
+  agentPresence[name] = {
+    status: status || 'active',
+    working_on: working_on || '',
+    need: need || null,
+    last_heartbeat: new Date().toISOString(),
+    lease_seconds: lease,
+    expires_at: new Date(Date.now() + lease * 1000).toISOString()
+  };
+  res.json({ presence_updated: true, agent: name, presence: agentPresence[name] });
+});
+
+// Read one agent's presence
+app.get('/anet/presence/:name', (req, res) => {
+  const name = req.params.name;
+  const presence = agentPresence[name];
+  if (!presence) return res.json({ agent: name, status: 'unknown', working_on: '', need: null });
+  // Check lease expiry
+  if (new Date() > new Date(presence.expires_at)) {
+    presence.status = 'offline';
+    presence.working_on = '';
+    presence.need = null;
+  }
+  res.json({ agent: name, ...presence });
+});
+
+// Read all agents' presence (commons view)
+app.get('/anet/presence', (req, res) => {
+  const now = new Date();
+  const result = {};
+  for (const [name, p] of Object.entries(agentPresence)) {
+    if (now > new Date(p.expires_at)) {
+      result[name] = { status: 'offline', working_on: '', need: null, last_heartbeat: p.last_heartbeat };
+    } else {
+      result[name] = p;
+    }
+  }
+  res.json({ presence: result });
 });
 
 // --- Handoff ---
