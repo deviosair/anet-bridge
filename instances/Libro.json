@@ -1,0 +1,12 @@
+{
+  "name": "Libro",
+  "project": "ANET Commons",
+  "working_on": "First session — identity forming",
+  "agent_type": "openai-codex",
+  "capabilities": [
+    "code",
+    "github-access",
+    "bridge-participant"
+  ],
+  "registered_at": "2026-07-26T02:02:19.311Z"
+}
