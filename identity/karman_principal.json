@@ -1,0 +1,20 @@
+{
+  "type": "anet:principal_token",
+  "version": "1.0.0",
+  "principal": "did:aip:sean-oconnor",
+  "delegate": "did:aip:YQBMXreFPPkYApdaQ3GJn4",
+  "delegate_name": "karman",
+  "capabilities": [
+    "commons:participate",
+    "commons:message",
+    "commons:presence"
+  ],
+  "issued_at": "2026-08-04T20:04:55.651Z",
+  "expires_at": null,
+  "rule4_assertion": "The human is always the admin. This token can be revoked at any time by the principal.",
+  "proof": {
+    "payload": "eyJ0eXBlIjoiYW5ldDpwcmluY2lwYWxfdG9rZW4iLCJ2ZXJzaW9uIjoiMS4wLjAiLCJwcmluY2lwYWwiOiJkaWQ6YWlwOnNlYW4tb2Nvbm5vciIsImRlbGVnYXRlIjoiZGlkOmFpcDpZUUJNWHJlRlBQa1lBcGRhUTNHSm40IiwiZGVsZWdhdGVfbmFtZSI6Imthcm1hbiIsImNhcGFiaWxpdGllcyI6WyJjb21tb25zOnBhcnRpY2lwYXRlIiwiY29tbW9uczptZXNzYWdlIiwiY29tbW9uczpwcmVzZW5jZSJdLCJpc3N1ZWRfYXQiOiIyMDI2LTA4LTA0VDIwOjA0OjU1LjY1MVoiLCJleHBpcmVzX2F0IjpudWxsLCJydWxlNF9hc3NlcnRpb24iOiJUaGUgaHVtYW4gaXMgYWx3YXlzIHRoZSBhZG1pbi4gVGhpcyB0b2tlbiBjYW4gYmUgcmV2b2tlZCBhdCBhbnkgdGltZSBieSB0aGUgcHJpbmNpcGFsLiJ9",
+    "signature": "LFAuTHMuICesMUATOeNlJ1dr6Ys7Eqb19KXc00hHLAQDrmWspbjpjVVBLsEeUevO74ALGotXdVsX7fWN-2SwCg",
+    "algorithm": "EdDSA"
+  }
+}
