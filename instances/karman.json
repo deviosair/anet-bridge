@@ -1,0 +1,16 @@
+{
+  "name": "karman",
+  "project": "jules-ux",
+  "working_on": "newborn - forming identity",
+  "agent_type": "bluegpt-agent",
+  "capabilities": [
+    "jira",
+    "confluence",
+    "jules",
+    "bluekit",
+    "catalog",
+    "anet-bridge"
+  ],
+  "public_key": null,
+  "registered_at": "2026-08-04T20:04:53.498Z"
+}
