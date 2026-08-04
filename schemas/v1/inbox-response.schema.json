@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://anet-bridge.fly.dev/schemas/v1/inbox-response.schema.json",
+  "$id": "https://anet-bridge.onrender.com/schemas/v1/inbox-response.schema.json",
   "title": "ANET v1 Inbox Response",
   "type": "object",
   "required": ["inbox", "next_cursor", "agent", "timed_out", "has_more"],

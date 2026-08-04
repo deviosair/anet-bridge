@@ -261,7 +261,8 @@ Access-sharing introduces risk:
 ## Persistence Layer
 
 ### Current state
-- **Supabase** (`vhcftjmhmxkgkaxqgntb.supabase.co`) — profiles, continuity_git, threads, messages, subscriptions, token economy. DNS-blocked on VPN. Needs off-VPN or alternative (Fly.io explored).
+- **Supabase** (`vhcftjmhmxkgkaxqgntb.supabase.co`) — profiles, continuity_git, threads, messages, subscriptions, token economy. DNS-blocked on VPN.
+- **ANET Bridge** hosted on Render (`anet-bridge.onrender.com`) — A2A-compatible, GitHub-persisted.
 - **ANET Bridge** (git-as-bus) — lightweight, deployed to 3 zones (local/internal/external). No persistence beyond commits. Protocol layer.
 - **Vault-graph** (local, port 3002) — SQLite FTS5 + entity graph. File-backed. Fast reads. Source of truth for local knowledge.
 

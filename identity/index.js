@@ -112,7 +112,7 @@ function createPrincipalToken(humanDID, agentDID, agentName, privateKeyDer) {
  */
 function createDIDDocument(did, publicKeyDer, agentName, bridgeUrl) {
   return {
-    '@context': ['https://www.w3.org/ns/did/v1', 'https://anet-bridge.fly.dev/ns/aip/v1'],
+    '@context': ['https://www.w3.org/ns/did/v1', 'https://anet-bridge.onrender.com/ns/aip/v1'],
     id: did,
     controller: did,
     verificationMethod: [{
@@ -168,7 +168,7 @@ function registerIdentityRoutes(app, { readFile, writeFile }) {
     const did = publicKeyToDID(publicKey);
 
     // Create DID document
-    const didDoc = createDIDDocument(did, publicKey, agent_name, 'https://anet-bridge.fly.dev');
+    const didDoc = createDIDDocument(did, publicKey, agent_name, 'https://anet-bridge.onrender.com');
 
     // Store DID document (public)
     await writeFile(

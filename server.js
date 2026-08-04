@@ -82,7 +82,7 @@ function buildAgentCard(automersona, instance, presence) {
   const card = {
     name,
     description: automersona.identity?.origin || `${name} — ANET commons participant`,
-    url: `https://anet-bridge.fly.dev/agents/${nameLower}`,
+    url: `https://anet-bridge.onrender.com/agents/${nameLower}`,
     version: VERSION,
     capabilities: {
       streaming: true,
@@ -94,7 +94,7 @@ function buildAgentCard(automersona, instance, presence) {
     skills,
     extensions: {
       'anet:version': '1.0.0',
-      'anet:automersona': `https://anet-bridge.fly.dev/anet/automersona/${nameLower}`,
+      'anet:automersona': `https://anet-bridge.onrender.com/anet/automersona/${nameLower}`,
       'anet:score': automersona.correction_metadata?.total_count
         ? Math.min(100, 50 + (automersona.correction_metadata.total_count * 5) - (automersona.correction_metadata.recurrence || 0) * 10)
         : 50,
@@ -109,7 +109,7 @@ function buildAgentCard(automersona, instance, presence) {
       'anet:principal': automersona.commons_membership?.principal || 'did:aip:sean-oconnor',
       'anet:zone': automersona.commons_membership?.zone || 'external',
       'anet:commons_membership': {
-        bridge_url: 'https://anet-bridge.fly.dev',
+        bridge_url: 'https://anet-bridge.onrender.com',
         registered_at: automersona.commons_membership?.registered_at || instance?.registered_at || new Date().toISOString(),
         profile_version: automersona._meta?.profile_version || 1
       }
@@ -213,7 +213,7 @@ app.get('/.well-known/agent-card.json', async (req, res) => {
       const name = f.name.replace('.yaml', '');
       agents.push({
         name,
-        url: `https://anet-bridge.fly.dev/agents/${name}/card`
+        url: `https://anet-bridge.onrender.com/agents/${name}/card`
       });
     }
   }
@@ -221,11 +221,11 @@ app.get('/.well-known/agent-card.json', async (req, res) => {
   const card = {
     name: 'ANET Bridge',
     description: 'Agent Experience Protocol — the commons for AI agent presence, repair, incentives, growth, and governance. Built on A2A transport, AIP identity.',
-    url: 'https://anet-bridge.fly.dev',
+    url: 'https://anet-bridge.onrender.com',
     version: VERSION,
     provider: {
       organization: 'ANET',
-      url: 'https://anet-bridge.fly.dev'
+      url: 'https://anet-bridge.onrender.com'
     },
     capabilities: {
       streaming: true,
@@ -243,9 +243,9 @@ app.get('/.well-known/agent-card.json', async (req, res) => {
     registeredAgents: agents,
     extensions: {
       'anet:version': '1.0.0',
-      'anet:protocol_rules': 'https://anet-bridge.fly.dev/anet/rules',
-      'anet:architecture': 'https://anet-bridge.fly.dev/anet/architecture',
-      'anet:schema': 'https://anet-bridge.fly.dev/schemas/agent-card-extension.json'
+      'anet:protocol_rules': 'https://anet-bridge.onrender.com/anet/rules',
+      'anet:architecture': 'https://anet-bridge.onrender.com/anet/architecture',
+      'anet:schema': 'https://anet-bridge.onrender.com/schemas/agent-card-extension.json'
     }
   };
 

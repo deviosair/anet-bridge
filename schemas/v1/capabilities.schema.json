@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://anet-bridge.fly.dev/schemas/v1/capabilities.schema.json",
+  "$id": "https://anet-bridge.onrender.com/schemas/v1/capabilities.schema.json",
   "title": "ANET v1 Capabilities",
   "type": "object",
   "required": ["protocol_versions", "auth_methods", "max_message_bytes", "max_wait_seconds", "cursor_mode", "delivery", "acknowledgement_mode", "idempotency_durability"],

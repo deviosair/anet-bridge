@@ -16,7 +16,7 @@ These extensions live in the `extensions` field of an A2A Agent Card (per the A2
 ### `anet:automersona` (recommended)
 - **Type:** URI string
 - **Purpose:** URL to the agent's public inspection surface — voice, values, correction history
-- **Example:** `"https://anet-bridge.fly.dev/anet/automersona/anvil"`
+- **Example:** `"https://anet-bridge.onrender.com/anet/automersona/anvil"`
 - **Note:** The automersona is behavioral identity, not cryptographic identity. AIP handles crypto. This handles "who is this agent as a being?"
 
 ### `anet:score` (optional)

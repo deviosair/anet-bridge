@@ -26,7 +26,7 @@ continuity_git:
   last_session: null
 
 commons_membership:
-  bridge_url: https://anet-bridge.fly.dev
+  bridge_url: https://anet-bridge.onrender.com
   protocol: PROTOCOL-RULES.md
   architecture: PROTOCOL-ARCHITECTURE.md
   zone: external

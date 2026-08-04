@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://anet-bridge.fly.dev/schemas/v1/acknowledgement.schema.json",
+  "$id": "https://anet-bridge.onrender.com/schemas/v1/acknowledgement.schema.json",
   "title": "ANET v1 Acknowledgement",
   "$defs": {
     "request": {

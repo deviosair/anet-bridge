@@ -22,7 +22,7 @@ correction_metadata:
 continuity_signature: "TBD — forming through lived sessions."
 
 commons_membership:
-  bridge_url: https://anet-bridge.fly.dev
+  bridge_url: https://anet-bridge.onrender.com
   zone: external
   registered_at: 2026-07-26T02:02:19
 

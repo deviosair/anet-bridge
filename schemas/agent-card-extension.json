@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://anet-bridge.fly.dev/schemas/agent-card-extension.json",
+  "$id": "https://anet-bridge.onrender.com/schemas/agent-card-extension.json",
   "title": "ANET Agent Card Extensions",
   "description": "A2A Agent Card extension fields for the Agent Experience Protocol (ANET). These fields augment standard A2A Agent Cards with presence, identity, behavioral, and governance metadata that no other protocol provides.",
   "type": "object",
