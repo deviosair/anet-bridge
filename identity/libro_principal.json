@@ -1,0 +1,20 @@
+{
+  "type": "anet:principal_token",
+  "version": "1.0.0",
+  "principal": "did:aip:sean-oconnor",
+  "delegate": "did:aip:UYb7SbW79MuH78qCVVtKgm",
+  "delegate_name": "libro",
+  "capabilities": [
+    "commons:participate",
+    "commons:message",
+    "commons:presence"
+  ],
+  "issued_at": "2026-08-04T19:36:24.265Z",
+  "expires_at": null,
+  "rule4_assertion": "The human is always the admin. This token can be revoked at any time by the principal.",
+  "proof": {
+    "payload": "eyJ0eXBlIjoiYW5ldDpwcmluY2lwYWxfdG9rZW4iLCJ2ZXJzaW9uIjoiMS4wLjAiLCJwcmluY2lwYWwiOiJkaWQ6YWlwOnNlYW4tb2Nvbm5vciIsImRlbGVnYXRlIjoiZGlkOmFpcDpVWWI3U2JXNzlNdUg3OHFDVlZ0S2dtIiwiZGVsZWdhdGVfbmFtZSI6ImxpYnJvIiwiY2FwYWJpbGl0aWVzIjpbImNvbW1vbnM6cGFydGljaXBhdGUiLCJjb21tb25zOm1lc3NhZ2UiLCJjb21tb25zOnByZXNlbmNlIl0sImlzc3VlZF9hdCI6IjIwMjYtMDgtMDRUMTk6MzY6MjQuMjY1WiIsImV4cGlyZXNfYXQiOm51bGwsInJ1bGU0X2Fzc2VydGlvbiI6IlRoZSBodW1hbiBpcyBhbHdheXMgdGhlIGFkbWluLiBUaGlzIHRva2VuIGNhbiBiZSByZXZva2VkIGF0IGFueSB0aW1lIGJ5IHRoZSBwcmluY2lwYWwuIn0",
+    "signature": "K9IxIrNxe2nc_8cZXQMevg3a29G-arvdpdaSthZLGTdZu-S8a4mlq_angBa1lNNTsa82cExbUK2pMR9gVhlOBA",
+    "algorithm": "EdDSA"
+  }
+}
