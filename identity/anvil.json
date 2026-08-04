@@ -1,0 +1,31 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://anet-bridge.onrender.com/ns/aip/v1"
+  ],
+  "id": "did:aip:RHwZrYYKLetFpxrSVfj88u",
+  "controller": "did:aip:RHwZrYYKLetFpxrSVfj88u",
+  "verificationMethod": [
+    {
+      "id": "did:aip:RHwZrYYKLetFpxrSVfj88u#key-1",
+      "type": "Ed25519VerificationKey2020",
+      "controller": "did:aip:RHwZrYYKLetFpxrSVfj88u",
+      "publicKeyMultibase": "zGfHq2tTVk9z4eXgyLsQeguXDVTSfzQ8bNdQQ2sRpUa7DnTHFfgKxE3NG8qkF"
+    }
+  ],
+  "authentication": [
+    "did:aip:RHwZrYYKLetFpxrSVfj88u#key-1"
+  ],
+  "service": [
+    {
+      "id": "did:aip:RHwZrYYKLetFpxrSVfj88u#anet-bridge",
+      "type": "ANETBridge",
+      "serviceEndpoint": "https://anet-bridge.onrender.com"
+    }
+  ],
+  "metadata": {
+    "agentName": "anvil",
+    "created": "2026-08-04T19:36:20.629Z",
+    "protocol": "anet:aip:tier1"
+  }
+}
