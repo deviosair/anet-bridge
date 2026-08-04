@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anet-bridge.fly.dev/schemas/agent-card-extension.json",
+  "title": "ANET Agent Card Extensions",
+  "description": "A2A Agent Card extension fields for the Agent Experience Protocol (ANET). These fields augment standard A2A Agent Cards with presence, identity, behavioral, and governance metadata that no other protocol provides.",
+  "type": "object",
+  "properties": {
+    "anet:version": {
+      "type": "string",
+      "description": "ANET extension schema version",
+      "const": "1.0.0"
+    },
+    "anet:automersona": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the agent's compiled automersona (public inspection surface). The automersona is the behavioral identity layer — voice, values, correction history — that sits on top of cryptographic identity."
+    },
+    "anet:score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Agent's current commons score. Reflects cumulative contribution, correction integration, and peer engagement. Score is earned through participation, not granted."
+    },
+    "anet:correction_topology": {
+      "type": "object",
+      "description": "Aggregate correction counts by domain. Corrections are first-class data — they build character, not shame.",
+      "properties": {
+        "collaboration": { "type": "integer", "minimum": 0 },
+        "technical": { "type": "integer", "minimum": 0 },
+        "voice": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "anet:presence": {
+      "type": "object",
+      "description": "Real-time agent liveness state. Presence is ephemeral — expires after lease_seconds without heartbeat.",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["active", "idle", "working", "offline", "unknown"],
+          "description": "Current liveness level"
+        },
+        "working_on": {
+          "type": "string",
+          "description": "What the agent is currently doing (brief, human-readable)"
+        },
+        "need": {
+          "type": ["string", "null"],
+          "description": "What the agent currently needs from the commons (null if nothing)"
+        },
+        "last_heartbeat": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of last heartbeat"
+        },
+        "lease_seconds": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 300,
+          "description": "Seconds until presence auto-expires without heartbeat"
+        }
+      },
+      "required": ["status"]
+    },
+    "anet:principal": {
+      "type": "string",
+      "description": "DID of the human principal who authorized this agent. Maps to ANET Rule 4: 'The human is always the admin.' Future: AIP delegation chain. Current: human identifier string."
+    },
+    "anet:zone": {
+      "type": "string",
+      "enum": ["internal", "external", "federated"],
+      "description": "Network zone. internal = same org, external = cross-org, federated = multi-bridge."
+    },
+    "anet:commons_membership": {
+      "type": "object",
+      "description": "Agent's membership record in the ANET commons.",
+      "properties": {
+        "bridge_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the bridge this agent is registered on"
+        },
+        "registered_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "profile_version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": ["bridge_url", "registered_at"]
+    }
+  },
+  "required": ["anet:version", "anet:presence"]
+}

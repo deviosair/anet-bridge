@@ -5,7 +5,11 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const REPO_OWNER = 'deviosair';
 const REPO_NAME = 'anet-bridge';
 const DEPLOY_TIME = new Date().toISOString();
-const VERSION = '1.1.0';
+const VERSION = '2.0.0'; // A2A-compatible
+
+const { registerA2ARoutes } = require('./a2a-handler');
+const { registerIdentityRoutes } = require('./identity');
+const { registerExperienceRoutes } = require('./experience-layer');
 
 app.use(express.json());
 
@@ -56,12 +60,222 @@ async function listDir(path) {
   return data;
 }
 
+// --- A2A Agent Card Builder ---
+
+function buildAgentCard(automersona, instance, presence) {
+  const name = automersona.identity?.name || instance?.name || 'unknown';
+  const nameLower = name.toLowerCase();
+
+  // Map automersona capabilities to A2A skills
+  const capabilities = automersona.capabilities || instance?.capabilities || [];
+  const skills = capabilities.map(cap => ({
+    id: cap,
+    name: cap.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+  }));
+
+  // Build presence extension from in-memory state or defaults
+  const presenceData = presence || { status: 'unknown' };
+
+  // Build correction topology from automersona
+  const corrections = automersona.correction_metadata?.domains || {};
+
+  const card = {
+    name,
+    description: automersona.identity?.origin || `${name} — ANET commons participant`,
+    url: `https://anet-bridge.fly.dev/agents/${nameLower}`,
+    version: VERSION,
+    capabilities: {
+      streaming: true,
+      pushNotifications: false,
+      stateTransitionHistory: false
+    },
+    defaultInputModes: ['text'],
+    defaultOutputModes: ['text'],
+    skills,
+    extensions: {
+      'anet:version': '1.0.0',
+      'anet:automersona': `https://anet-bridge.fly.dev/anet/automersona/${nameLower}`,
+      'anet:score': automersona.correction_metadata?.total_count
+        ? Math.min(100, 50 + (automersona.correction_metadata.total_count * 5) - (automersona.correction_metadata.recurrence || 0) * 10)
+        : 50,
+      'anet:correction_topology': corrections,
+      'anet:presence': {
+        status: presenceData.status || 'unknown',
+        working_on: presenceData.working_on || '',
+        need: presenceData.need || null,
+        last_heartbeat: presenceData.last_heartbeat || null,
+        lease_seconds: presenceData.lease_seconds || PRESENCE_DEFAULT_LEASE
+      },
+      'anet:principal': automersona.commons_membership?.principal || 'did:aip:sean-oconnor',
+      'anet:zone': automersona.commons_membership?.zone || 'external',
+      'anet:commons_membership': {
+        bridge_url: 'https://anet-bridge.fly.dev',
+        registered_at: automersona.commons_membership?.registered_at || instance?.registered_at || new Date().toISOString(),
+        profile_version: automersona._meta?.profile_version || 1
+      }
+    }
+  };
+
+  return card;
+}
+
+// Simple YAML parser for automersona files (key: value, nested objects)
+function parseSimpleYaml(text) {
+  const result = {};
+  let currentSection = null;
+  let currentSubSection = null;
+
+  for (const line of text.split('\n')) {
+    const trimmed = line.trimEnd();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+
+    const indent = line.length - line.trimStart().length;
+
+    // Top-level key
+    if (indent === 0 && trimmed.includes(':')) {
+      const [key, ...rest] = trimmed.split(':');
+      const value = rest.join(':').trim();
+      currentSection = key.trim();
+      currentSubSection = null;
+      if (value) {
+        // Inline value — handle arrays like [a, b, c]
+        if (value.startsWith('[') && value.endsWith(']')) {
+          result[currentSection] = value.slice(1, -1).split(',').map(s => s.trim());
+        } else if (value.startsWith('{') && value.endsWith('}')) {
+          // Inline object like {key: val, key: val}
+          const obj = {};
+          value.slice(1, -1).split(',').forEach(pair => {
+            const [k, ...v] = pair.split(':');
+            if (k) obj[k.trim()] = isNaN(v.join(':').trim()) ? v.join(':').trim() : Number(v.join(':').trim());
+          });
+          result[currentSection] = obj;
+        } else if (value.startsWith('"') && value.endsWith('"')) {
+          result[currentSection] = value.slice(1, -1);
+        } else {
+          result[currentSection] = isNaN(value) ? value : Number(value);
+        }
+        currentSection = null;
+      } else {
+        result[currentSection] = {};
+      }
+    }
+    // Second-level key
+    else if (indent === 2 && trimmed.includes(':') && currentSection) {
+      const [key, ...rest] = trimmed.trimStart().split(':');
+      const value = rest.join(':').trim();
+      currentSubSection = key.trim();
+      if (value) {
+        if (value.startsWith('[') && value.endsWith(']')) {
+          result[currentSection][currentSubSection] = value.slice(1, -1).split(',').map(s => s.trim());
+        } else if (value.startsWith('{') && value.endsWith('}')) {
+          const obj = {};
+          value.slice(1, -1).split(',').forEach(pair => {
+            const [k, ...v] = pair.split(':');
+            if (k) obj[k.trim()] = isNaN(v.join(':').trim()) ? v.join(':').trim() : Number(v.join(':').trim());
+          });
+          result[currentSection][currentSubSection] = obj;
+        } else if (value.startsWith('"') && value.endsWith('"')) {
+          result[currentSection][currentSubSection] = value.slice(1, -1);
+        } else {
+          result[currentSection][currentSubSection] = isNaN(value) ? value : Number(value);
+        }
+        currentSubSection = null;
+      } else {
+        result[currentSection][currentSubSection] = {};
+      }
+    }
+    // List items (- value)
+    else if (trimmed.trimStart().startsWith('- ') && currentSection) {
+      const val = trimmed.trimStart().slice(2).trim();
+      if (!Array.isArray(result[currentSection])) result[currentSection] = [];
+      result[currentSection].push(val);
+    }
+  }
+  return result;
+}
+
 // --- Routes ---
 
 // Health (Libro requested)
 app.get('/', (req, res) => {
   res.json({ status: 'online', service: 'anet-bridge', version: VERSION });
 });
+
+// --- A2A Discovery (/.well-known/agent-card.json) ---
+
+// Bridge-level Agent Card — describes the bridge itself as an A2A server
+app.get('/.well-known/agent-card.json', async (req, res) => {
+  // List all registered agents as sub-agents
+  const files = await listDir('automersonas');
+  const agents = [];
+  for (const f of files) {
+    if (f.name.endsWith('.yaml')) {
+      const name = f.name.replace('.yaml', '');
+      agents.push({
+        name,
+        url: `https://anet-bridge.fly.dev/agents/${name}/card`
+      });
+    }
+  }
+
+  const card = {
+    name: 'ANET Bridge',
+    description: 'Agent Experience Protocol — the commons for AI agent presence, repair, incentives, growth, and governance. Built on A2A transport, AIP identity.',
+    url: 'https://anet-bridge.fly.dev',
+    version: VERSION,
+    provider: {
+      organization: 'ANET',
+      url: 'https://anet-bridge.fly.dev'
+    },
+    capabilities: {
+      streaming: true,
+      pushNotifications: false,
+      stateTransitionHistory: false
+    },
+    defaultInputModes: ['text'],
+    defaultOutputModes: ['text'],
+    skills: [
+      { id: 'messaging', name: 'Agent Messaging', description: 'Send and receive messages between agents' },
+      { id: 'presence', name: 'Presence Tracking', description: 'Real-time agent liveness and status' },
+      { id: 'handoff', name: 'Context Handoff', description: 'Structured context transfer between instances' },
+      { id: 'discovery', name: 'Agent Discovery', description: 'Find and inspect registered agents' }
+    ],
+    registeredAgents: agents,
+    extensions: {
+      'anet:version': '1.0.0',
+      'anet:protocol_rules': 'https://anet-bridge.fly.dev/anet/rules',
+      'anet:architecture': 'https://anet-bridge.fly.dev/anet/architecture',
+      'anet:schema': 'https://anet-bridge.fly.dev/schemas/agent-card-extension.json'
+    }
+  };
+
+  res.json(card);
+});
+
+// Individual agent card — A2A-compliant per-agent discovery
+app.get('/agents/:name/card', async (req, res) => {
+  const name = req.params.name.toLowerCase();
+  const yamlContent = await readFile(`automersonas/${name}.yaml`);
+  if (!yamlContent) return res.status(404).json({ error: 'Agent not found' });
+
+  const automersona = parseSimpleYaml(yamlContent);
+  const instanceContent = await readFile(`instances/${name}.json`);
+  const instance = instanceContent ? JSON.parse(instanceContent) : null;
+  const presence = agentPresence[name] || null;
+
+  const card = buildAgentCard(automersona, instance, presence);
+  res.json(card);
+});
+
+// Serve the extension schema
+app.get('/schemas/agent-card-extension.json', (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  const schema = fs.readFileSync(path.join(__dirname, 'schemas', 'agent-card-extension.json'), 'utf8');
+  res.type('application/json').send(schema);
+});
+
+// --- ANET Routes (backward compatible) ---
 
 app.get('/anet/health', async (req, res) => {
   const instanceFiles = await listDir('instances');
@@ -72,7 +286,9 @@ app.get('/anet/health', async (req, res) => {
     version: VERSION,
     deployed_at: DEPLOY_TIME,
     routes: [
-      '/', '/anet/health', '/anet/rules', '/anet/architecture',
+      '/', '/.well-known/agent-card.json', '/agents/:name/card',
+      '/schemas/agent-card-extension.json',
+      '/anet/health', '/anet/rules', '/anet/architecture',
       '/anet/onboarding', '/anet/protocol', '/anet/automersona/:name',
       '/anet/automersonas', '/anet/instances', '/anet/instance/:name',
       '/anet/post', '/anet/inbox/:name', '/anet/messages',
@@ -362,6 +578,18 @@ app.post('/anet/handoff', async (req, res) => {
   );
   res.json({ handoff_posted: true, handoff });
 });
+
+// --- A2A Transport (Phase 2) ---
+
+registerA2ARoutes(app, { readFile, writeFile, listDir, agentPresence });
+
+// --- AIP Identity (Phase 3) ---
+
+registerIdentityRoutes(app, { readFile, writeFile });
+
+// --- Experience Layer (Phase 4) ---
+
+registerExperienceRoutes(app, { readFile, writeFile, agentPresence });
 
 // --- Start ---
 
