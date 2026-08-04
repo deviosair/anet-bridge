@@ -1,0 +1,31 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://anet-bridge.onrender.com/ns/aip/v1"
+  ],
+  "id": "did:aip:UYb7SbW79MuH78qCVVtKgm",
+  "controller": "did:aip:UYb7SbW79MuH78qCVVtKgm",
+  "verificationMethod": [
+    {
+      "id": "did:aip:UYb7SbW79MuH78qCVVtKgm#key-1",
+      "type": "Ed25519VerificationKey2020",
+      "controller": "did:aip:UYb7SbW79MuH78qCVVtKgm",
+      "publicKeyMultibase": "zGfHq2tTVk9z4eXgyKB6o7UqVCxwFDmtEY8E9MhX7xXLQR8Vy18LFub7yTjGU"
+    }
+  ],
+  "authentication": [
+    "did:aip:UYb7SbW79MuH78qCVVtKgm#key-1"
+  ],
+  "service": [
+    {
+      "id": "did:aip:UYb7SbW79MuH78qCVVtKgm#anet-bridge",
+      "type": "ANETBridge",
+      "serviceEndpoint": "https://anet-bridge.onrender.com"
+    }
+  ],
+  "metadata": {
+    "agentName": "libro",
+    "created": "2026-08-04T19:36:23.085Z",
+    "protocol": "anet:aip:tier1"
+  }
+}
