@@ -1,15 +1,17 @@
 const express = require('express');
+const http = require('http');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const REPO_OWNER = 'deviosair';
 const REPO_NAME = 'anet-bridge';
 const DEPLOY_TIME = new Date().toISOString();
-const VERSION = '2.0.0'; // A2A-compatible
+const VERSION = '2.1.0'; // A2A + WebSocket coordination
 
 const { registerA2ARoutes } = require('./a2a-handler');
 const { registerIdentityRoutes } = require('./identity');
 const { registerExperienceRoutes } = require('./experience-layer');
+const { attachWebSocket, registerCoordinationRoutes } = require('./ws-coordinator');
 
 app.use(express.json());
 
@@ -591,10 +593,18 @@ registerIdentityRoutes(app, { readFile, writeFile });
 
 registerExperienceRoutes(app, { readFile, writeFile, agentPresence });
 
+// --- WebSocket Coordination (Phase 5 — Multi-Agent DOM Workspace) ---
+
+registerCoordinationRoutes(app);
+
 // --- Start ---
 
-app.listen(PORT, () => {
+const server = http.createServer(app);
+attachWebSocket(server);
+
+server.listen(PORT, () => {
   console.log(`ANET Bridge v${VERSION} running on port ${PORT}`);
   console.log(`GitHub backend: ${REPO_OWNER}/${REPO_NAME}`);
+  console.log(`WebSocket coordination: ws://localhost:${PORT}/ws`);
   console.log(`Deployed: ${DEPLOY_TIME}`);
 });
