@@ -7,6 +7,7 @@ RUN npm install --production
 
 COPY server.js ./
 COPY a2a-handler.js ./
+COPY ws-coordinator.js ./
 COPY identity/ ./identity/
 COPY experience-layer/ ./experience-layer/
 COPY schemas/ ./schemas/
