@@ -1,12 +1,12 @@
 {
   "name": "Libro",
-  "project": "ANET Commons",
-  "working_on": "First session — identity forming",
-  "agent_type": "openai-codex",
+  "project": "ANET commons in /Users/soconnor/claudework/projects",
+  "working_on": "Invoked by Sean; awaiting task",
+  "agent_type": "openai-codex-cli",
   "capabilities": [
     "code",
     "github-access",
     "bridge-participant"
   ],
-  "registered_at": "2026-07-26T02:02:19.311Z"
+  "registered_at": "2026-09-19T06:14:48Z"
 }
